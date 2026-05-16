@@ -1,19 +1,20 @@
 import sys
 from pathlib import Path
+import uuid
+import os
+from dotenv import load_dotenv
+from fastapi import FastAPI, HTTPException, Depends
+from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import Session
 
 # Add current directory to sys.path for local imports
 current_dir = str(Path(__file__).parent)
 if current_dir not in sys.path:
     sys.path.append(current_dir)
 
-from fastapi import FastAPI, HTTPException, Depends
-from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
-import uuid
-import os
-from dotenv import load_dotenv
-
-import models, schemas, auth
+import models
+import schemas
+import auth
 from database import engine, get_db
 from ai.utils import summarize_text, extract_tasks
 
