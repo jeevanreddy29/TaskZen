@@ -1,9 +1,11 @@
 import os
 import sys
 
-# Add the root directory to the path so we can import 'server' as a package
+# Add the root and server directories to the path
 root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+server_dir = os.path.join(root_dir, "server")
 sys.path.append(root_dir)
+sys.path.append(server_dir)
 
 from server.main import app
 
