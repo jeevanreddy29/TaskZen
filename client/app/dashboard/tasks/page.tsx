@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -41,7 +42,7 @@ const priorityColors: Record<Priority, string> = {
 };
 
 export default function TasksPage() {
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const [tasks, setTasks] = useLocalStorage<Task[]>("taskzen-tasks", initialTasks);
   const [newTask, setNewTask] = useState("");
   const [newDue, setNewDue] = useState("");
   const [newPriority, setNewPriority] = useState<Priority>("Medium");

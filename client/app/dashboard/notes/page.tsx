@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -39,8 +40,8 @@ const initialNotes: Note[] = [
 ];
 
 export default function NotesPage() {
-  const [notes, setNotes] = useState<Note[]>(initialNotes);
-  const [selectedNote, setSelectedNote] = useState<Note | null>(notes[0]);
+  const [notes, setNotes] = useLocalStorage<Note[]>("taskzen-notes", initialNotes);
+  const [selectedNote, setSelectedNote] = useState<Note | null>(notes[0] || null);
   const [newTitle, setNewTitle] = useState("");
   const [editContent, setEditContent] = useState(selectedNote?.content || "");
   const [aiLoading, setAiLoading] = useState(false);
