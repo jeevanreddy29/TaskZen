@@ -11,10 +11,12 @@ from ai.utils import summarize_text, extract_tasks
 
 load_dotenv()
 
-# Create database tables
-models.Base.metadata.create_all(bind=engine)
-
 app = FastAPI(title="TaskZen API")
+
+@app.on_event("startup")
+def on_startup():
+    # Create database tables on startup
+    models.Base.metadata.create_all(bind=engine)
 
 app.add_middleware(
     CORSMiddleware,
