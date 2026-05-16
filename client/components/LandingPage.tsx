@@ -1,10 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, Zap, Shield, Rocket, CheckCircle2, Layout, BookOpen, Video } from "lucide-react";
+import { Sparkles, Zap, Rocket, Layout, BookOpen, Video, CalendarDays, MessageSquare } from "lucide-react";
 
 export default function LandingPage() {
   const features = [
@@ -12,26 +13,38 @@ export default function LandingPage() {
       title: "AI Task Manager",
       description: "Auto-prioritize tasks, suggest schedules, and generate subtasks instantly.",
       icon: <Layout className="w-6 h-6 text-blue-400" />,
-      badge: "MVP"
+      badge: "MVP",
     },
     {
       title: "AI Notes Assistant",
       description: "Convert messy notes into actionable tasks and get AI-powered summaries.",
       icon: <BookOpen className="w-6 h-6 text-purple-400" />,
-      badge: "MVP"
+      badge: "MVP",
     },
     {
       title: "Meeting Summarizer",
       description: "Extract action items and follow-ups from meeting transcripts with one click.",
       icon: <Video className="w-6 h-6 text-emerald-400" />,
-      badge: "New"
+      badge: "New",
     },
     {
       title: "Daily Planner",
-      description: "Optimize your day with focus time suggestions and calendar integration.",
-      icon: <Zap className="w-6 h-6 text-orange-400" />,
-      badge: "Popular"
-    }
+      description: "Optimize your day with AI-generated focus blocks and schedule suggestions.",
+      icon: <CalendarDays className="w-6 h-6 text-orange-400" />,
+      badge: "Popular",
+    },
+    {
+      title: "AI Chat Coach",
+      description: "Your personal productivity coach available 24/7 to keep you on track.",
+      icon: <MessageSquare className="w-6 h-6 text-pink-400" />,
+      badge: "New",
+    },
+    {
+      title: "Smart Automation",
+      description: "Automate repetitive workflows and let AI handle the heavy lifting.",
+      icon: <Zap className="w-6 h-6 text-yellow-400" />,
+      badge: "Soon",
+    },
   ];
 
   return (
@@ -42,8 +55,30 @@ export default function LandingPage() {
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-900/20 blur-[120px] rounded-full" />
       </div>
 
+      {/* Navbar */}
+      <nav className="relative z-10 border-b border-white/5 backdrop-blur-sm">
+        <div className="container mx-auto px-6 h-16 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center">
+              <Zap className="w-3.5 h-3.5 text-white" />
+            </div>
+            <span className="text-lg font-bold text-white tracking-tight">
+              Task<span className="text-purple-400">Zen</span>
+            </span>
+          </Link>
+          <div className="flex items-center gap-3">
+            <Link href="/sign-in">
+              <Button variant="ghost" className="text-gray-300 hover:text-white">Sign In</Button>
+            </Link>
+            <Link href="/sign-up">
+              <Button className="bg-purple-600 hover:bg-purple-700 rounded-full px-5">Get Started</Button>
+            </Link>
+          </div>
+        </div>
+      </nav>
+
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 px-6 overflow-hidden">
+      <section className="relative pt-28 pb-20 px-6 overflow-hidden">
         <div className="container mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -63,13 +98,17 @@ export default function LandingPage() {
               into one seamless, AI-powered workspace.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button size="lg" className="bg-purple-600 hover:bg-purple-700 text-white px-8 h-12 rounded-full text-lg">
-                Start for Free
-                <Rocket className="w-4 h-4 ml-2" />
-              </Button>
-              <Button size="lg" variant="outline" className="border-white/10 hover:bg-white/5 px-8 h-12 rounded-full text-lg">
-                View Demo
-              </Button>
+              <Link href="/sign-up">
+                <Button size="lg" className="bg-purple-600 hover:bg-purple-700 text-white px-8 h-12 rounded-full text-lg">
+                  Start for Free
+                  <Rocket className="w-4 h-4 ml-2" />
+                </Button>
+              </Link>
+              <Link href="/sign-in">
+                <Button size="lg" variant="outline" className="border-white/10 hover:bg-white/5 px-8 h-12 rounded-full text-lg">
+                  View Dashboard →
+                </Button>
+              </Link>
             </div>
           </motion.div>
         </div>
@@ -78,13 +117,17 @@ export default function LandingPage() {
       {/* Features Grid */}
       <section className="py-20 px-6 relative">
         <div className="container mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="text-center mb-14">
+            <h2 className="text-4xl font-bold text-white mb-3">Everything you need to stay in flow</h2>
+            <p className="text-gray-400 max-w-xl mx-auto">Powered by Gemini and GPT-4 — your entire productivity stack, reimagined.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {features.map((feature, index) => (
               <motion.div
                 key={feature.title}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
+                transition={{ duration: 0.5, delay: index * 0.08 }}
               >
                 <Card className="bg-white/5 border-white/10 backdrop-blur-xl hover:border-purple-500/50 transition-all group h-full">
                   <CardHeader>
@@ -106,15 +149,18 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Trust Section */}
-      <section className="py-20 border-t border-white/5">
-        <div className="container mx-auto px-6">
-          <div className="flex flex-wrap justify-center items-center gap-12 opacity-50 grayscale hover:grayscale-0 transition-all">
-            <div className="text-2xl font-bold tracking-tighter">NeuroFlow</div>
-            <div className="text-2xl font-bold tracking-tighter">FocusPilot</div>
-            <div className="text-2xl font-bold tracking-tighter">SmartFlow</div>
-            <div className="text-2xl font-bold tracking-tighter">IntelliDesk</div>
-          </div>
+      {/* CTA */}
+      <section className="py-24 px-6 relative">
+        <div className="container mx-auto text-center">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+            <h2 className="text-5xl font-bold text-white mb-4">Ready to transform your workflow?</h2>
+            <p className="text-gray-400 mb-8">Join thousands of professionals who use TaskZen to work smarter.</p>
+            <Link href="/sign-up">
+              <Button size="lg" className="bg-purple-600 hover:bg-purple-700 text-white px-10 h-12 rounded-full text-lg">
+                Get Started — It's Free
+              </Button>
+            </Link>
+          </motion.div>
         </div>
       </section>
 
