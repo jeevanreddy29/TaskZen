@@ -104,7 +104,7 @@ export default function LandingPage() {
                   <Rocket className="w-4 h-4 ml-2" />
                 </Button>
               </Link>
-              <Link href="/sign-in">
+              <Link href="/dashboard">
                 <Button size="lg" variant="outline" className="border-white/10 hover:bg-white/5 px-8 h-12 rounded-full text-lg">
                   View Dashboard →
                 </Button>

@@ -16,7 +16,7 @@ def get_gemini_model():
         if not api_key:
             return None
         genai.configure(api_key=api_key)
-        _gemini_model = genai.GenerativeModel('gemini-1.5-flash')
+        _gemini_model = genai.GenerativeModel('gemini-1.5-flash-latest')
     return _gemini_model
 
 def get_openai_client():
