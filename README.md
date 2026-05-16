@@ -19,8 +19,8 @@ TaskZen is a modern, AI-powered productivity platform designed to help you manag
 
 ### Prerequisites
 
-- Node.js 20+
 - Python 3.12+
+- Node.js 20+
 - Clerk API Keys
 - OpenAI/Gemini API Keys
 
