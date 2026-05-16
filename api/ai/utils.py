@@ -5,27 +5,49 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Configure Gemini
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-gemini_model = genai.GenerativeModel('gemini-1.5-flash')
+# Global variables for models (lazy initialization)
+_gemini_model = None
+_openai_client = None
 
-# Configure OpenAI
-openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+def get_gemini_model():
+    global _gemini_model
+    if _gemini_model is None:
+        api_key = os.getenv("GEMINI_API_KEY")
+        if not api_key:
+            return None
+        genai.configure(api_key=api_key)
+        _gemini_model = genai.GenerativeModel('gemini-1.5-flash')
+    return _gemini_model
+
+def get_openai_client():
+    global _openai_client
+    if _openai_client is None:
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            return None
+        _openai_client = OpenAI(api_key=api_key)
+    return _openai_client
 
 async def generate_completion(prompt: str, provider: str = "gemini"):
     """
     Generates a completion using either Gemini or OpenAI.
     """
     if provider == "gemini":
+        model = get_gemini_model()
+        if not model:
+            return "Gemini Error: Missing API Key"
         try:
-            response = gemini_model.generate_content(prompt)
+            response = model.generate_content(prompt)
             return response.text
         except Exception as e:
             return f"Gemini Error: {str(e)}"
     
     elif provider == "openai":
+        client = get_openai_client()
+        if not client:
+            return "OpenAI Error: Missing API Key"
         try:
-            response = openai_client.chat.completions.create(
+            response = client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[{"role": "user", "content": prompt}]
             )
