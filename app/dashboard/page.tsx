@@ -62,11 +62,18 @@ export default function DashboardPage() {
 
   const recentDynamicTasks = tasks.slice(0, 4);
 
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning! 👋";
+    if (hour < 18) return "Good afternoon! 👋";
+    return "Good evening! 👋";
+  };
+
   return (
     <div className="space-y-8">
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-        <h1 className="text-3xl font-bold text-white tracking-tight">Good morning! 👋</h1>
+        <h1 className="text-3xl font-bold text-white tracking-tight">{getGreeting()}</h1>
         <p className="text-gray-400 mt-1">Here's your productivity overview for today.</p>
       </motion.div>
 
