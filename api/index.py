@@ -20,7 +20,7 @@ from ai.utils import summarize_text, extract_tasks
 
 load_dotenv()
 
-app = FastAPI(title="TaskZen API")
+app = FastAPI(title="TaskZen API", root_path="/api")
 
 @app.on_event("startup")
 def on_startup():
