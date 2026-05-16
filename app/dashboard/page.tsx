@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { currentUser } from "@clerk/nextjs/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CheckSquare, FileText, Video, Zap, TrendingUp, Clock, Star } from "lucide-react";
@@ -38,9 +37,18 @@ const statusColors: Record<string, string> = {
   Pending: "bg-gray-500/10 text-gray-400",
 };
 
+import { useState, useEffect } from "react";
+import { useApi } from "@/lib/api";
+
 export default function DashboardPage() {
-  const [tasks] = useLocalStorage<any[]>("taskzen-tasks", []);
-  const [notes] = useLocalStorage<any[]>("taskzen-notes", []);
+  const { fetchWithToken } = useApi();
+  const [tasks, setTasks] = useState<any[]>([]);
+  const [notes, setNotes] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetchWithToken("/tasks").then(setTasks).catch(console.error);
+    fetchWithToken("/notes").then(setNotes).catch(console.error);
+  }, [fetchWithToken]);
 
   const activeTasks = tasks.filter(t => t.status !== "done");
   const completedTasks = tasks.filter(t => t.status === "done");
