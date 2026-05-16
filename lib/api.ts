@@ -3,7 +3,8 @@ import { useCallback } from "react";
 
 export function useApi() {
   const { getToken } = useAuth();
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+  const isProd = typeof window !== "undefined" && !window.location.hostname.includes("localhost");
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || (isProd ? "/api" : "http://localhost:8000");
 
   const fetchWithToken = useCallback(
     async (endpoint: string, options: RequestInit = {}) => {
