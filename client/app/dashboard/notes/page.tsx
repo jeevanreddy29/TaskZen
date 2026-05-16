@@ -39,14 +39,28 @@ const initialNotes: Note[] = [
   },
 ];
 
+import { useEffect } from "react";
+import { useApi } from "@/lib/api";
+
 export default function NotesPage() {
-  const [notes, setNotes] = useLocalStorage<Note[]>("taskzen-notes", initialNotes);
-  const [selectedNote, setSelectedNote] = useState<Note | null>(notes[0] || null);
+  const { fetchWithToken } = useApi();
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [newTitle, setNewTitle] = useState("");
   const [editContent, setEditContent] = useState(selectedNote?.content || "");
   const [aiLoading, setAiLoading] = useState(false);
   const [aiMode, setAiMode] = useState<null | "summary" | "tasks">(null);
   const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    fetchWithToken("/notes").then(data => {
+      setNotes(data);
+      if (data.length > 0 && !selectedNote) {
+        setSelectedNote(data[0]);
+        setEditContent(data[0].content);
+      }
+    }).catch(console.error);
+  }, [fetchWithToken]);
 
   const selectNote = (note: Note) => {
     setSelectedNote(note);
@@ -54,54 +68,67 @@ export default function NotesPage() {
     setAiMode(null);
   };
 
-  const createNote = () => {
+  const createNote = async () => {
     if (!newTitle.trim()) return;
-    const note: Note = {
-      id: Date.now().toString(),
-      title: newTitle.trim(),
-      content: "",
-      createdAt: new Date().toISOString().split("T")[0],
-    };
-    setNotes([note, ...notes]);
-    setSelectedNote(note);
-    setEditContent("");
-    setNewTitle("");
-  };
-
-  const updateContent = (content: string) => {
-    setEditContent(content);
-    if (selectedNote) {
-      setNotes(notes.map(n => n.id === selectedNote.id ? { ...n, content } : n));
-      setSelectedNote({ ...selectedNote, content });
+    try {
+      const created = await fetchWithToken("/notes", {
+        method: "POST",
+        body: JSON.stringify({ title: newTitle.trim(), content: "" })
+      });
+      setNotes([created, ...notes]);
+      setSelectedNote(created);
+      setEditContent("");
+      setNewTitle("");
+    } catch (e) {
+      console.error(e);
     }
   };
 
-  const deleteNote = (id: string) => {
+  const updateContent = async (content: string) => {
+    setEditContent(content);
+    if (!selectedNote) return;
+    setNotes(notes.map(n => n.id === selectedNote.id ? { ...n, content } : n));
+    setSelectedNote({ ...selectedNote, content });
+    
+    // In a real app, you'd debounce this. Doing it immediately for simplicity but could cause rate limits.
+    try {
+      await fetchWithToken(`/notes/${selectedNote.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ content })
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const deleteNote = async (id: string) => {
     const remaining = notes.filter(n => n.id !== id);
     setNotes(remaining);
     setSelectedNote(remaining[0] || null);
     setEditContent(remaining[0]?.content || "");
+    try {
+      await fetchWithToken(`/notes/${id}`, { method: "DELETE" });
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const runAI = async (mode: "summary" | "tasks") => {
     if (!selectedNote) return;
     setAiLoading(true);
     setAiMode(mode);
-    await new Promise(r => setTimeout(r, 1600));
-    if (mode === "summary") {
-      const summary = `AI Summary: ${selectedNote.content.slice(0, 120)}...`;
-      const updated = { ...selectedNote, aiSummary: summary };
-      setNotes(notes.map(n => n.id === selectedNote.id ? updated : n));
-      setSelectedNote(updated);
-    } else {
-      const tasks = [
-        `Follow up on: "${selectedNote.title}"`,
-        "Schedule a review meeting",
-        "Draft documentation for this topic",
-      ];
-      const updated = { ...selectedNote, aiTasks: tasks };
-      setNotes(notes.map(n => n.id === selectedNote.id ? updated : n));
-      setSelectedNote(updated);
+    try {
+      if (mode === "summary") {
+        const updated = await fetchWithToken(`/notes/${selectedNote.id}/ai-summarize`, { method: "POST" });
+        setNotes(notes.map(n => n.id === selectedNote.id ? updated : n));
+        setSelectedNote(updated);
+      } else {
+        const updated = await fetchWithToken(`/notes/${selectedNote.id}/ai-tasks`, { method: "POST" });
+        setNotes(notes.map(n => n.id === selectedNote.id ? updated : n));
+        setSelectedNote(updated);
+      }
+    } catch (e) {
+      console.error(e);
     }
     setAiLoading(false);
   };

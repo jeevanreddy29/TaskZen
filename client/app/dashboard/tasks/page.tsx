@@ -41,9 +41,12 @@ const priorityColors: Record<Priority, string> = {
   Low: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
 };
 
+import { useEffect } from "react";
+import { useApi } from "@/lib/api";
+
 export default function TasksPage() {
-  const [tasks, setTasks] = useLocalStorage<Task[]>("taskzen-tasks", initialTasks);
-  const [newTask, setNewTask] = useState("");
+  const { fetchWithToken } = useApi();
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [newDue, setNewDue] = useState("");
   const [newPriority, setNewPriority] = useState<Priority>("Medium");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -52,64 +55,90 @@ export default function TasksPage() {
   const [aiInput, setAiInput] = useState("");
   const [aiLoading2, setAiLoading2] = useState(false);
 
-  const addTask = () => {
+  useEffect(() => {
+    fetchWithToken("/tasks").then(setTasks).catch(console.error);
+  }, [fetchWithToken]);
+
+  const addTask = async () => {
     if (!newTask.trim()) return;
-    const task: Task = {
-      id: Date.now().toString(),
+    const taskData = {
       title: newTask.trim(),
       priority: newPriority,
       status: "todo",
       due: newDue || new Date().toISOString().split("T")[0],
-      subtasks: [],
-      aiGenerated: false,
     };
-    setTasks([task, ...tasks]);
-    setNewTask(""); setNewDue("");
-    setIsDialogOpen(false);
+    try {
+      const created = await fetchWithToken("/tasks", {
+        method: "POST",
+        body: JSON.stringify(taskData)
+      });
+      setTasks([created, ...tasks]);
+      setNewTask(""); setNewDue("");
+      setIsDialogOpen(false);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
-  const toggleStatus = (id: string) => {
-    setTasks(tasks.map(t =>
-      t.id === id
-        ? { ...t, status: t.status === "done" ? "todo" : "done" }
-        : t
-    ));
+  const toggleStatus = async (id: string) => {
+    const task = tasks.find(t => t.id === id);
+    if (!task) return;
+    const newStatus = task.status === "done" ? "todo" : "done";
+    setTasks(tasks.map(t => t.id === id ? { ...t, status: newStatus } : t));
+    try {
+      await fetchWithToken(`/tasks/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ status: newStatus })
+      });
+    } catch (e) {
+      console.error(e);
+      setTasks(tasks.map(t => t.id === id ? { ...t, status: task.status } : t));
+    }
   };
 
-  const deleteTask = (id: string) => {
+  const deleteTask = async (id: string) => {
     setTasks(tasks.filter(t => t.id !== id));
+    try {
+      await fetchWithToken(`/tasks/${id}`, { method: "DELETE" });
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const generateSubtasks = async (task: Task) => {
     setAiLoading(task.id);
-    // Simulate AI call
-    await new Promise(r => setTimeout(r, 1500));
-    const mockSubtasks = [
-      `Research best practices for "${task.title}"`,
-      `Draft initial outline`,
-      `Review and iterate`,
-      `Final check & submit`,
-    ];
-    setTasks(tasks.map(t => t.id === task.id ? { ...t, subtasks: mockSubtasks, aiGenerated: true } : t));
-    setExpandedTask(task.id);
+    try {
+      const updated = await fetchWithToken(`/tasks/${task.id}/ai-subtasks`, { method: "POST" });
+      setTasks(tasks.map(t => t.id === task.id ? updated : t));
+      setExpandedTask(task.id);
+    } catch (e) {
+      console.error(e);
+    }
     setAiLoading(null);
   };
 
   const aiCreateTask = async () => {
+    // For MVP, just create a task with the input
     if (!aiInput.trim()) return;
     setAiLoading2(true);
-    await new Promise(r => setTimeout(r, 1200));
-    const task: Task = {
-      id: Date.now().toString(),
+    const taskData = {
       title: aiInput.trim(),
       priority: "High",
       status: "todo",
       due: new Date(Date.now() + 86400000 * 2).toISOString().split("T")[0],
-      subtasks: [`Plan "${aiInput.trim()}"`, "Execute step by step", "Review outcome"],
-      aiGenerated: true,
     };
-    setTasks([task, ...tasks]);
-    setAiInput("");
+    try {
+      const created = await fetchWithToken("/tasks", {
+        method: "POST",
+        body: JSON.stringify(taskData)
+      });
+      // automatically generate subtasks for it!
+      const updated = await fetchWithToken(`/tasks/${created.id}/ai-subtasks`, { method: "POST" });
+      setTasks([updated, ...tasks]);
+      setAiInput("");
+    } catch (e) {
+      console.error(e);
+    }
     setAiLoading2(false);
   };
 
