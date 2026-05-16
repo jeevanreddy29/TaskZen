@@ -47,6 +47,7 @@ import { useApi } from "@/lib/api";
 export default function TasksPage() {
   const { fetchWithToken } = useApi();
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [newTask, setNewTask] = useState("");
   const [newDue, setNewDue] = useState("");
   const [newPriority, setNewPriority] = useState<Priority>("Medium");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
